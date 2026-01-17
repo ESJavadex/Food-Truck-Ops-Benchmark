@@ -59,6 +59,7 @@ Salida:
 ## Generar predicciones con OpenRouter
 ```bash
 PYTHONPATH=src python tools/openrouter_generate.py --cases data/food_truck_ops_cases.jsonl --model openai/gpt-4o-mini --out predictions/openrouter_preds.jsonl
+PYTHONPATH=src python tools/run_eval.py --preds predictions/openrouter_preds.jsonl --model openai/gpt-4o-mini --update-leaderboard --meta predictions/openai__gpt-4o-mini_meta.json
 ```
 
 ## UI de leaderboard

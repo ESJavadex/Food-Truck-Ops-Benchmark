@@ -3,6 +3,7 @@
 data/*.jsonl
 data/*.csv
 leaderboard/report.json
+leaderboard/reports/
 predictions/*.jsonl
 predictions/*.csv
 predictions/failed/

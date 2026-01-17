@@ -18,16 +18,25 @@ def main() -> None:
     parser.add_argument("--tokens", type=int, default=0, help="Total tokens used for the run")
     parser.add_argument("--cost", type=float, default=0.0, help="Total cost for the run in USD")
     parser.add_argument("--runtime", type=float, default=0.0, help="Runtime in seconds")
+    parser.add_argument("--meta", default="", help="Optional metadata JSON from generation")
     args = parser.parse_args()
 
     cases = load_jsonl(args.cases)
     plans = load_jsonl(args.preds)
     report = evaluate_all(cases, plans)
+    tokens = args.tokens
+    cost = args.cost
+    runtime = args.runtime
+    if args.meta:
+        meta = _load_meta(args.meta)
+        tokens = tokens or meta.get("tokens_total", 0)
+        cost = cost or meta.get("cost_usd_total", 0)
+        runtime = runtime or meta.get("runtime_sec", 0)
     report["model"] = args.model
     report["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
-    report["tokens"] = args.tokens
-    report["cost_usd"] = args.cost
-    report["runtime_sec"] = args.runtime
+    report["tokens"] = tokens
+    report["cost_usd"] = cost
+    report["runtime_sec"] = runtime
     report.update(_derive_run_metrics(report))
 
     with open(args.out, "w", encoding="utf-8") as f:
@@ -97,6 +106,15 @@ def _derive_run_metrics(report: dict) -> dict:
         "valid_cases": len(valid),
         "total_cases": total,
     }
+
+
+def _load_meta(path: str) -> dict:
+    try:
+        with open(path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data.get("totals", {}) if "totals" in data else data
+    except FileNotFoundError:
+        return {}
 
 
 if __name__ == "__main__":

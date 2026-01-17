@@ -276,9 +276,9 @@ async function loadLeaderboard() {
           const report = await fetch(`../leaderboard/reports/${safe}.json`);
           if (!report.ok) return;
           const data = await report.json();
-          model.tokens = data.tokens || 0;
-          model.cost = data.cost_usd || 0;
-          model.successRate = data.constraint_success_rate || 0;
+          model.tokens = data.tokens ?? 0;
+          model.cost = data.cost_usd ?? 0;
+          model.successRate = data.constraint_success_rate ?? 0;
           model.history = data.history || [model.avgScore];
         } catch (err) {
           return;

@@ -122,6 +122,25 @@ function renderCompare(models) {
   updateCompare(selectA.value, selectB.value);
 }
 
+function renderPredictionsPicker(models) {
+  const select = document.getElementById("pred-model");
+  const panel = document.getElementById("predictions");
+  if (!select || !panel) return;
+  select.innerHTML = "";
+  if (!models.length) {
+    panel.innerHTML = "<p>No prediction data.</p>";
+    return;
+  }
+  models.forEach((model) => {
+    const option = document.createElement("option");
+    option.value = model.name;
+    option.textContent = model.name;
+    select.appendChild(option);
+  });
+  select.addEventListener("change", () => loadPredictions(select.value));
+  loadPredictions(select.value);
+}
+
 function setCompareModels(name) {
   const selectA = document.getElementById("model-a");
   if (selectA) {
@@ -291,11 +310,61 @@ async function loadLeaderboard() {
   }
 }
 
+function formatRoute(route) {
+  if (!Array.isArray(route)) return "--";
+  return route
+    .map((block) => `${block.location} (${block.hours.join(",")})`)
+    .join(" · ");
+}
+
+async function loadPredictions(modelName) {
+  const panel = document.getElementById("predictions");
+  if (!panel) return;
+  panel.innerHTML = "<p>Loading predictions...</p>";
+  const safe = modelName.replaceAll("/", "__").replaceAll(":", "__");
+  const candidates = [
+    `../predictions/${safe}.jsonl`,
+    `../predictions/${modelName.split("/").pop()}.jsonl`,
+  ];
+  for (const path of candidates) {
+    try {
+      const response = await fetch(path);
+      if (!response.ok) continue;
+      const text = await response.text();
+      const lines = text
+        .trim()
+        .split("\n")
+        .filter((line) => line.trim());
+      const rows = lines.slice(0, 6).map((line) => JSON.parse(line));
+      panel.innerHTML = "";
+      rows.forEach((row) => {
+        const div = document.createElement("div");
+        div.className = "prediction-row";
+        const menu = (row.menu || []).map((m) => m.item).join(", ");
+        const purchases = row.purchases ? Object.keys(row.purchases).length : 0;
+        div.innerHTML = `
+          <strong>${row.id || "case"}</strong>
+          <small>Menu: ${menu || "--"}</small>
+          <small>Ingredients: ${purchases}</small>
+          <small>Route: ${formatRoute(row.route)}</small>
+        `;
+        panel.appendChild(div);
+      });
+      return;
+    } catch (err) {
+      continue;
+    }
+  }
+  panel.innerHTML =
+    "<p>No local predictions found. Place JSONL in predictions/ to view.</p>";
+}
+
 async function boot() {
   state.models = await loadLeaderboard();
   renderSummary(state.models);
   renderLeaderboard(state.models);
   renderCompare(state.models);
+  renderPredictionsPicker(state.models);
   chartBars(state.models);
   chartScatter(state.models);
   chartTrend(state.models);

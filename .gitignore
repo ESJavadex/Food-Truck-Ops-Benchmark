@@ -7,5 +7,7 @@ leaderboard/reports/
 predictions/*.jsonl
 predictions/*.csv
 predictions/failed/
+predictions/*.json
+predictions/*.txt
 __pycache__/
 *.pyc

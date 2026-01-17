@@ -112,6 +112,10 @@ body {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
 }
 
+.grid.one {
+  grid-template-columns: 1fr;
+}
+
 .card {
   background: var(--panel);
   border-radius: var(--radius);
@@ -225,6 +229,28 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.predictions {
+  display: grid;
+  gap: 10px;
+}
+
+.prediction-row {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 12px;
+  display: grid;
+  gap: 6px;
+  background: #fbfaf8;
+}
+
+.prediction-row strong {
+  font-size: 0.95rem;
+}
+
+.prediction-row small {
+  color: var(--muted);
 }
 
 .example {

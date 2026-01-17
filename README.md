@@ -64,7 +64,12 @@ PYTHONPATH=src python tools/run_eval.py --preds predictions/openrouter_preds.jso
 
 ## UI de leaderboard
 La interfaz vive en `web/index.html`. Abrela en el navegador y lee `leaderboard/leaderboard.csv`.
-Si el archivo no existe, usa datos demo.
+Si el archivo no existe, muestra estado vacio.
+
+### Predictions Viewer (local)
+Para mostrar predicciones en la UI, coloca el JSONL en `predictions/` con uno de estos nombres:
+- `predictions/<model_safe>.jsonl` (ej: `openai__gpt-4o-mini.jsonl`)
+- `predictions/<model>.jsonl` (ej: `gpt-4o-mini.jsonl`)
 
 ## Reglas soportadas (constraints)
 - `required_location_hours`

@@ -76,7 +76,7 @@ def _extract_message_text(message: dict) -> str:
     return ""
 
 
-def _call_openrouter(api_key: str, model: str, prompt: str, max_tokens: int, temperature: float) -> dict:
+def _call_openrouter(api_key: str, model: str, prompt: str, temperature: float) -> dict:
     url = "https://openrouter.ai/api/v1/chat/completions"
     payload = {
         "model": model,
@@ -85,7 +85,6 @@ def _call_openrouter(api_key: str, model: str, prompt: str, max_tokens: int, tem
             {"role": "user", "content": prompt},
         ],
         "temperature": temperature,
-        "max_tokens": max_tokens,
     }
     response_format = os.environ.get("OPENROUTER_RESPONSE_FORMAT")
     if response_format == "json":
@@ -177,7 +176,6 @@ def main() -> None:
     parser.add_argument("--cases", default="data/food_truck_ops_cases.jsonl")
     parser.add_argument("--out", default="predictions/openrouter_preds.jsonl")
     parser.add_argument("--model", required=True)
-    parser.add_argument("--max-tokens", type=int, default=800)
     parser.add_argument("--temperature", type=float, default=0.2)
     parser.add_argument("--sleep", type=float, default=0.5)
     parser.add_argument("--retries", type=int, default=2)
@@ -206,7 +204,7 @@ def main() -> None:
         raw = ""
         plan = None
         for attempt in range(args.retries + 1):
-            response = _call_openrouter(api_key, args.model, prompt, args.max_tokens, args.temperature)
+            response = _call_openrouter(api_key, args.model, prompt, args.temperature)
             raw = response["text"]
             try:
                 plan = _normalize_plan(_parse_json(raw))

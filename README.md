@@ -62,6 +62,16 @@ PYTHONPATH=src python tools/openrouter_generate.py --cases data/food_truck_ops_c
 PYTHONPATH=src python tools/run_eval.py --preds predictions/openrouter_preds.jsonl --model openai/gpt-4o-mini --update-leaderboard --meta predictions/openai__gpt-4o-mini_meta.json
 ```
 
+## Ejecutar varios modelos en paralelo
+1) Crea `models.json`:
+```json
+{"models":["openai/gpt-4o-mini","openai/gpt-4.1-nano"]}
+```
+2) Ejecuta:
+```bash
+PYTHONPATH=src python tools/run_batch.py --models models.json --parallel 3
+```
+
 ## UI de leaderboard
 La interfaz vive en `web/index.html`. Abrela en el navegador y lee `leaderboard/leaderboard.csv`.
 Si el archivo no existe, muestra estado vacio.

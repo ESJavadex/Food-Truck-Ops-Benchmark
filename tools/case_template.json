@@ -1,0 +1,30 @@
+{
+  "id": "fto_XXX",
+  "hours": ["09", "10", "11", "12", "13"],
+  "budget": 200,
+  "capacity_units": 120,
+  "locations": [
+    {
+      "name": "Location A",
+      "hourly_demand": {
+        "09": {"Item A": 5},
+        "10": {"Item A": 5}
+      }
+    }
+  ],
+  "menu_items": [
+    {
+      "item": "Item A",
+      "price": 7,
+      "diet": "vegan",
+      "ingredients": {"ingredient_a": 1}
+    }
+  ],
+  "ingredients": [
+    {"name": "ingredient_a", "unit_cost": 0.5, "storage_units": 1}
+  ],
+  "constraints": [
+    {"type": "max_price", "value": 10}
+  ],
+  "profit_scale": {"target": 250, "floor": -50}
+}

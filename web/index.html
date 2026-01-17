@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Food Truck Ops Leaderboard</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page">
+      <header class="hero">
+        <div class="hero__content">
+          <p class="eyebrow">Food Truck Ops Benchmark</p>
+          <h1>Plan fast. Waste less. Win the day.</h1>
+          <p class="lead">
+            A compact, real-world optimization benchmark that scores planning quality across profit,
+            waste, and constraints. Compare models on a single screen with clear, useful metrics.
+          </p>
+          <div class="pill-row">
+            <span class="pill">20 cases</span>
+            <span class="pill">Private dataset</span>
+            <span class="pill">Budget + capacity constraints</span>
+            <span class="pill">JSON-only plans</span>
+          </div>
+        </div>
+        <div class="hero__panel">
+          <div class="stat">
+            <p class="stat__label">Top Score</p>
+            <p class="stat__value" id="top-score">--</p>
+            <p class="stat__meta" id="top-model">--</p>
+          </div>
+          <div class="stat">
+            <p class="stat__label">Avg Cost / Run</p>
+            <p class="stat__value" id="avg-cost">--</p>
+            <p class="stat__meta" id="avg-tokens">--</p>
+          </div>
+          <div class="stat">
+            <p class="stat__label">Constraint Success</p>
+            <p class="stat__value" id="constraint-rate">--</p>
+            <p class="stat__meta">Across latest run</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="grid two">
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Leaderboard</h2>
+              <p>Ranked by average score. Click to compare.</p>
+            </div>
+            <button class="ghost" id="refresh">Refresh</button>
+          </div>
+          <div class="leaderboard" id="leaderboard"></div>
+        </div>
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Model Compare</h2>
+              <p>Side-by-side deltas and resource usage.</p>
+            </div>
+          </div>
+          <div class="compare">
+            <div>
+              <label>Model A</label>
+              <select id="model-a"></select>
+            </div>
+            <div>
+              <label>Model B</label>
+              <select id="model-b"></select>
+            </div>
+          </div>
+          <div class="compare__grid" id="compare-grid"></div>
+        </div>
+      </section>
+
+      <section class="grid three">
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Score Distribution</h2>
+              <p>Average score per model.</p>
+            </div>
+          </div>
+          <div class="chart" id="chart-bars"></div>
+        </div>
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Cost vs Score</h2>
+              <p>Efficiency trade-offs.</p>
+            </div>
+          </div>
+          <div class="chart" id="chart-scatter"></div>
+        </div>
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Score Trend</h2>
+              <p>Latest runs over time.</p>
+            </div>
+          </div>
+          <div class="chart" id="chart-trend"></div>
+        </div>
+      </section>
+
+      <section class="grid two">
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>Benchmark Example</h2>
+              <p>Visual walkthrough of a single case.</p>
+            </div>
+          </div>
+          <div class="example">
+            <div class="example__timeline">
+              <div class="slot">
+                <span>09</span>
+                <div>
+                  <strong>Office Park</strong>
+                  <small>Beef Taco 6 · Veg Wrap 4 · Coffee 10</small>
+                </div>
+              </div>
+              <div class="slot">
+                <span>10</span>
+                <div>
+                  <strong>Office Park</strong>
+                  <small>Beef Taco 8 · Veg Wrap 5 · Coffee 12</small>
+                </div>
+              </div>
+              <div class="slot vegan">
+                <span>12</span>
+                <div>
+                  <strong>Office Park</strong>
+                  <small>Vegan-only hour</small>
+                </div>
+              </div>
+              <div class="slot">
+                <span>13</span>
+                <div>
+                  <strong>Station</strong>
+                  <small>Veg Wrap 4 · Coffee 4 · Soup 4</small>
+                </div>
+              </div>
+            </div>
+            <div class="example__summary">
+              <h3>Plan Summary</h3>
+              <ul>
+                <li>Menu: Veg Wrap, Hot Coffee, Soup Cup</li>
+                <li>Route: Office Park (09-12), Station (13)</li>
+                <li>Constraints met: vegan-only at 12, 3+ hours in Office Park</li>
+                <li>Score: Profit 46 / Waste 18 / Constraints 20</li>
+              </ul>
+              <div class="mini-chart">
+                <div class="mini-bar" style="width: 64%">Profit</div>
+                <div class="mini-bar" style="width: 90%">Waste</div>
+                <div class="mini-bar" style="width: 100%">Constraints</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card__header">
+            <div>
+              <h2>What We Measure</h2>
+              <p>Practical planning intelligence, not trivia.</p>
+            </div>
+          </div>
+          <div class="metric-list">
+            <div>
+              <h4>Profit Score</h4>
+              <p>Rewarded for maximizing revenue under budget and demand.</p>
+            </div>
+            <div>
+              <h4>Waste Score</h4>
+              <p>Penalized for unused inventory and overbuying.</p>
+            </div>
+            <div>
+              <h4>Constraint Score</h4>
+              <p>Strict validation of route, price, diet, and capacity rules.</p>
+            </div>
+            <div>
+              <h4>Token Economics</h4>
+              <p>Track tokens, runtime, and cost per evaluation run.</p>
+            </div>
+          </div>
+          <div class="note">
+            The dataset is private. This UI reads leaderboard outputs and report files only.
+          </div>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <p>Food Truck Ops Benchmark · Built for fast, transparent model comparison.</p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>

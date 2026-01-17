@@ -1,0 +1,8 @@
+.env
+data/*.jsonl
+data/*.csv
+leaderboard/report.json
+predictions/*.jsonl
+predictions/*.csv
+__pycache__/
+*.pyc

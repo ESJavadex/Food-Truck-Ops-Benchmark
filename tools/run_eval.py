@@ -1,5 +1,6 @@
 import argparse
 import json
+import os
 from datetime import datetime, timezone
 
 from food_truck_ops.evaluator import evaluate_all
@@ -14,6 +15,9 @@ def main() -> None:
     parser.add_argument("--model", default="unknown", help="Model name for leaderboard")
     parser.add_argument("--update-leaderboard", action="store_true")
     parser.add_argument("--leaderboard", default="leaderboard/leaderboard.csv")
+    parser.add_argument("--tokens", type=int, default=0, help="Total tokens used for the run")
+    parser.add_argument("--cost", type=float, default=0.0, help="Total cost for the run in USD")
+    parser.add_argument("--runtime", type=float, default=0.0, help="Runtime in seconds")
     args = parser.parse_args()
 
     cases = load_jsonl(args.cases)
@@ -21,9 +25,15 @@ def main() -> None:
     report = evaluate_all(cases, plans)
     report["model"] = args.model
     report["generated_at"] = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    report["tokens"] = args.tokens
+    report["cost_usd"] = args.cost
+    report["runtime_sec"] = args.runtime
+    report.update(_derive_run_metrics(report))
 
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(report, f, ensure_ascii=True, indent=2)
+
+    _write_model_report(report, args.model)
 
     if args.update_leaderboard:
         _update_leaderboard(args.leaderboard, args.model, report["avg_score"])
@@ -60,6 +70,33 @@ def _update_leaderboard(path: str, model: str, score: float) -> None:
         f.write(header)
         for row in updated:
             f.write(row)
+
+
+def _safe_model_id(model: str) -> str:
+    return model.replace("/", "__").replace(":", "__")
+
+
+def _write_model_report(report: dict, model: str) -> None:
+    out_dir = "leaderboard/reports"
+    os.makedirs(out_dir, exist_ok=True)
+    path = os.path.join(out_dir, f"{_safe_model_id(model)}.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(report, f, ensure_ascii=True, indent=2)
+
+
+def _derive_run_metrics(report: dict) -> dict:
+    results = report.get("results", [])
+    total = len(results)
+    valid = [r for r in results if "error" not in r]
+    constraint_full = [r for r in valid if r.get("constraint_score") == 20.0]
+    success_rate = len(valid) / total if total else 0.0
+    constraint_rate = len(constraint_full) / len(valid) if valid else 0.0
+    return {
+        "valid_rate": round(success_rate, 3),
+        "constraint_success_rate": round(constraint_rate, 3),
+        "valid_cases": len(valid),
+        "total_cases": total,
+    }
 
 
 if __name__ == "__main__":

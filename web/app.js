@@ -1,35 +1,3 @@
-const demoData = {
-  models: [
-    {
-      name: "openai/gpt-4o-mini",
-      avgScore: 14.03,
-      tokens: 21500,
-      cost: 0.41,
-      successRate: 0.45,
-      lastRun: "2026-01-17",
-      history: [12.2, 13.1, 14.03],
-    },
-    {
-      name: "openai/gpt-4.1-mini",
-      avgScore: 0.0,
-      tokens: 22800,
-      cost: 0.38,
-      successRate: 0.0,
-      lastRun: "2026-01-17",
-      history: [0.0, 0.0, 0.0],
-    },
-    {
-      name: "anthropic/claude-3.5-sonnet",
-      avgScore: 62.4,
-      tokens: 19800,
-      cost: 0.91,
-      successRate: 0.86,
-      lastRun: "2026-01-16",
-      history: [58.2, 61.0, 62.4],
-    },
-  ],
-};
-
 const state = {
   models: [],
 };
@@ -54,12 +22,13 @@ function formatScore(value) {
 }
 
 function formatTokens(value) {
-  if (!value) return "--";
+  if (value === undefined || value === null) return "--";
+  if (!value) return "0";
   return `${(value / 1000).toFixed(1)}k`;
 }
 
 function formatCost(value) {
-  if (value === undefined) return "--";
+  if (value === undefined || value === null) return "--";
   return `$${value.toFixed(2)}`;
 }
 
@@ -68,6 +37,14 @@ function pickTop(models) {
 }
 
 function renderSummary(models) {
+  if (!models.length) {
+    document.getElementById("top-score").textContent = "--";
+    document.getElementById("top-model").textContent = "No data";
+    document.getElementById("avg-cost").textContent = "--";
+    document.getElementById("avg-tokens").textContent = "--";
+    document.getElementById("constraint-rate").textContent = "--";
+    return;
+  }
   const top = pickTop(models);
   document.getElementById("top-score").textContent = top ? formatScore(top.avgScore) : "--";
   document.getElementById("top-model").textContent = top ? top.name : "--";
@@ -90,6 +67,10 @@ function renderSummary(models) {
 
 function renderLeaderboard(models) {
   leaderboardEl.innerHTML = "";
+  if (!models.length) {
+    leaderboardEl.innerHTML = "<p>No leaderboard data found.</p>";
+    return;
+  }
   const rows = models
     .slice()
     .sort((a, b) => b.avgScore - a.avgScore)
@@ -113,6 +94,11 @@ function renderCompare(models) {
   const selectB = document.getElementById("model-b");
   selectA.innerHTML = "";
   selectB.innerHTML = "";
+
+  if (!models.length) {
+    document.getElementById("compare-grid").innerHTML = "<p>No comparison data.</p>";
+    return;
+  }
 
   models.forEach((model) => {
     const optionA = document.createElement("option");
@@ -176,6 +162,10 @@ function updateCompare(nameA, nameB) {
 
 function chartBars(models) {
   const container = document.getElementById("chart-bars");
+  if (!models.length) {
+    container.innerHTML = "<p>No data.</p>";
+    return;
+  }
   const width = container.clientWidth || 300;
   const height = 200;
   const maxScore = Math.max(...models.map((m) => m.avgScore), 1);
@@ -200,6 +190,10 @@ function chartBars(models) {
 
 function chartScatter(models) {
   const container = document.getElementById("chart-scatter");
+  if (!models.length) {
+    container.innerHTML = "<p>No data.</p>";
+    return;
+  }
   const width = container.clientWidth || 300;
   const height = 200;
   const maxScore = Math.max(...models.map((m) => m.avgScore), 1);
@@ -226,6 +220,10 @@ function chartScatter(models) {
 
 function chartTrend(models) {
   const container = document.getElementById("chart-trend");
+  if (!models.length) {
+    container.innerHTML = "<p>No data.</p>";
+    return;
+  }
   const width = container.clientWidth || 300;
   const height = 200;
 
@@ -271,9 +269,25 @@ async function loadLeaderboard() {
       successRate: 0,
       history: [Number(row.avg_score)],
     }));
-    return models.length ? models : demoData.models;
+    await Promise.all(
+      models.map(async (model) => {
+        const safe = model.name.replaceAll("/", "__").replaceAll(":", "__");
+        try {
+          const report = await fetch(`../leaderboard/reports/${safe}.json`);
+          if (!report.ok) return;
+          const data = await report.json();
+          model.tokens = data.tokens || 0;
+          model.cost = data.cost_usd || 0;
+          model.successRate = data.constraint_success_rate || 0;
+          model.history = data.history || [model.avgScore];
+        } catch (err) {
+          return;
+        }
+      })
+    );
+    return models;
   } catch (err) {
-    return demoData.models;
+    return [];
   }
 }
 

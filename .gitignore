@@ -1,8 +1,10 @@
 .env
+.DS_Store
 data/*.jsonl
 data/*.csv
 leaderboard/report.json
 predictions/*.jsonl
 predictions/*.csv
+predictions/failed/
 __pycache__/
 *.pyc

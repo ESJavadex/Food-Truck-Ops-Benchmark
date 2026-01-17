@@ -48,12 +48,13 @@ Si el plan no es valido (presupuesto, capacidad, horas incompletas, etc), el sco
 
 ## Ejecutar evaluacion
 ```bash
-PYTHONPATH=src python tools/run_eval.py --preds predictions/openrouter_preds.jsonl --model my-model --update-leaderboard
+PYTHONPATH=src python tools/run_eval.py --preds predictions/openrouter_preds.jsonl --model my-model --update-leaderboard --tokens 12000 --cost 0.42 --runtime 18.4
 ```
 
 Salida:
 - Reporte: `leaderboard/report.json`
 - Leaderboard actualizado: `leaderboard/leaderboard.csv`
+- Reporte por modelo: `leaderboard/reports/<model>.json`
 
 ## Generar predicciones con OpenRouter
 ```bash

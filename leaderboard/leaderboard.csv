@@ -2,6 +2,6 @@ model,avg_score,last_run
 openai/gpt-4o-mini,14.03,2026-01-17T21:16:21.213676Z
 openai/gpt-4.1-mini,0.00,2026-01-17T21:31:11.435310Z
 openai/gpt-4.1-nano,19.57,2026-01-17T21:45:18.279413Z
-anthropic/claude-opus-4.5,3.75,2026-01-17T21:56:33.274748Z
-anthropic/claude-sonnet-4.5,0.00,2026-01-17T21:56:34.977703Z
-google/gemini-3-flash-preview,0.00,2026-01-17T21:56:36.385926Z
+anthropic/claude-opus-4.5,3.75,2026-01-17T22:29:16.850804Z
+anthropic/claude-sonnet-4.5,0.00,2026-01-17T22:28:50.619146Z
+google/gemini-3-flash-preview,0.00,2026-01-17T22:30:08.107648Z

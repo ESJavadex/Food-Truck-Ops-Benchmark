@@ -275,9 +275,14 @@ function chartTrend(models) {
 
 async function loadLeaderboard() {
   try {
-    const response = await fetch("../leaderboard/leaderboard.csv");
-    if (!response.ok) throw new Error("missing leaderboard");
-    const csv = await response.text();
+    const match = await fetchFirst([
+      "../leaderboard/leaderboard.csv",
+      "./leaderboard/leaderboard.csv",
+      "leaderboard/leaderboard.csv",
+    ]);
+    if (!match) throw new Error("missing leaderboard");
+    const csv = await match.response.text();
+    const base = match.path.replace(/leaderboard\.csv$/, "");
     const rows = parseCsv(csv);
     const models = rows.map((row) => ({
       name: row.model,
@@ -292,7 +297,7 @@ async function loadLeaderboard() {
       models.map(async (model) => {
         const safe = model.name.replaceAll("/", "__").replaceAll(":", "__");
         try {
-          const report = await fetch(`../leaderboard/reports/${safe}.json`);
+          const report = await fetch(`${ensureTrailingSlash(base)}reports/${safe}.json`);
           if (!report.ok) return;
           const data = await report.json();
           model.tokens = data.tokens ?? 0;
@@ -317,15 +322,32 @@ function formatRoute(route) {
     .join(" · ");
 }
 
+async function fetchFirst(paths) {
+  for (const path of paths) {
+    try {
+      const response = await fetch(path);
+      if (response.ok) return { response, path };
+    } catch (err) {
+      continue;
+    }
+  }
+  return null;
+}
+
+function ensureTrailingSlash(path) {
+  return path.endsWith("/") ? path : `${path}/`;
+}
+
 async function loadPredictions(modelName) {
   const panel = document.getElementById("predictions");
   if (!panel) return;
   panel.innerHTML = "<p>Loading predictions...</p>";
   const safe = modelName.replaceAll("/", "__").replaceAll(":", "__");
-  const candidates = [
-    `../predictions/${safe}.jsonl`,
-    `../predictions/${modelName.split("/").pop()}.jsonl`,
-  ];
+  const bases = ["../predictions/", "./predictions/", "predictions/"];
+  const names = [`${safe}.jsonl`, `${modelName.split("/").pop()}.jsonl`];
+  const candidates = bases.flatMap((base) =>
+    names.map((name) => `${ensureTrailingSlash(base)}${name}`)
+  );
   for (const path of candidates) {
     try {
       const response = await fetch(path);
